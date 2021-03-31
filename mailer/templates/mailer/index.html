@@ -4,131 +4,96 @@
 <head>
 	<meta charset="UTF-8">
 	<title>Greetings Cards Spammers</title>
+	<!-- Font Awesome -->
+	<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.2/css/all.css">
+	<!-- Google Fonts -->
+	<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap">
+	<!-- Bootstrap core CSS -->
+	<link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.5.0/css/bootstrap.min.css" rel="stylesheet">
+	<!-- Material Design Bootstrap -->
+	<link href="https://cdnjs.cloudflare.com/ajax/libs/mdbootstrap/4.19.1/css/mdb.min.css" rel="stylesheet">
+	<link href="{% static 'css/cards-extended.min.css' %}" rel="stylesheet">
+	
 	<script src="{% static "js/jquery-2.1.1.js" %}"></script>
-	<script>
-	$(document).ready(function(){
-		$("table tr").hover(function(){
-				$("table *").css("background-color", ""); // remove background color from everything (un-hover)
-			hoveretr = this;
-		$("td:contains(.)").each(function(){
-
-	 function processchildrow(theparentrow) {
-		 parenttbl = $(theparentrow).parents("table");
-		 found = 0; // find state machine marker
-		 markrows = new Array();
-		 parenttbl.find("tr").each(function(){
-			 var foundrow = this;
-			 if(found == 0 && foundrow == theparentrow) found = 1;
-			 if(found == 1 && $(foundrow).is(":contains(Orders)")) {
-				 orderscll= $(foundrow).find("td").eq(2);
-				 numorders=+orderscll.text().split(" ")[1]; //use + for faster integer
-				 if(numorders>3) markrows[markrows.length]=foundrow;//put in array for marking later
-				 return
-			 }
-			 if(found == 1 && foundrow != theparentrow  &&  $(foundrow).find("td:first").text().length) // has company name in first cell
-				 found = 2;
-		 });
-		 for(key in markrows) {
-			 row=markrows[key]
-			 $(row).find("td").css("background-color", "yellow");
-		 }
-		 return markrows
- 
- 
-	 }
-
-			price = $(this).text();
-			trueprice = "";
-			if (price.indexOf(".", price.length - ".".length) === -1)
-			{
-				trueprice = price;
-			}
-
-			if (trueprice)
-			{
-				if (parseInt(trueprice) > 50000)
-				{
-					finalprice = parseInt(trueprice);
-					firstsib = $(this).siblings(":first");
-					therow = $(firstsib).parents("tr");
-
-					$(therow).find("td").each(function(elem){
-						elem = $(this);
-
-						if(therow[0] !== hoveretr) return; // === better than ==
-
-						if($(elem).css("background-color"))
-							$(elem).css("background-color", ""); // remove background color
-
-						$(elem).css("background-color", 'green');
-						processchildrow(therow[0]);
-					});
-				}
-				else
-				{
-					finalprice = parseInt(trueprice);
-					firstsib = $(this).siblings(":first");
-					therow = $(firstsib).parents("tr");
-
-					$(therow).find("td").each(function(elem){
-						elem = $(this);
-						if(therow[0] !== hoveretr) return; // === better than ==
-
-						if($(elem).css("background-color"))
-							$(elem).css("background-color", ""); // remove background color
-
-						$(elem).css("background-color", 'orange');
-					});
-				}
-			}
-			
-
-		});
-		});
-	});
-	</script>
 </head>
 <body>
-	<div style="width:1020px; margin: 0 auto; border:1px solid blue;">
-	<table width="1020">
+<div class='container'>
 	{% if is_paginated %}
-	<tr><td>
-		{% if page_obj.has_previous %}
-		<a href="?page={{ page_obj.previous_page_number }}" class="pager-prev{% if not page_obj.has_previous %} inactive{% endif %}">&laquo;</a>
-		{% endif %}
-		</td>
-		<td></td>
-		<td></td>
-		<td>
-		{% if page_obj.has_next %}
-			<a href="?page={{ page_obj.next_page_number }}" class="pager-next{% if not page_obj.has_next %} inactive{% endif %}">&raquo;</a>
-		{% endif %}
-		</td>
-	</tr>
-	{% endif %}
-	<tr>
-		<th>Name</th>
-		<th>Order Count</th>
-		<th>Order Sum</th>
-		<th>Select</th>
-	</tr>
-		{% for company in company_list %}
-		<tr>
-			<td>{{ company.name }}</td>
-			<td>{{ company.get_order_count }}</td>
-			<td>{{ company.get_order_sum|floatformat:2 }}</td>
-			<td><input type="checkbox" name="select{{company.pk}}" id=""></td>
-		</tr>
-			{% for contact in company.contacts.all %}
-			<tr>
-				<td>&nbsp;</td>
-				<td>{{ contact.first_name }} {{ contact.last_name }}</td>
-				<td>Orders: {{ contact.get_order_count }}</td>
-				<td></td>
-			</tr>
+		<div class='row text-center'>
+			
+			{% if page_obj.has_previous %}
+				<a href="?page={{ page_obj.previous_page_number }}" class="pager-prev{% if not page_obj.has_previous %} inactive{% endif %}"><i class="far fa-arrow-alt-circle-left fa-2x"></i></a>
+			{% endif %}
+	
+			{% if page_obj.has_next %}
+				<a href="?page={{ page_obj.next_page_number }}" class="pager-next{% if not page_obj.has_next %} inactive{% endif %}"><i class="far fa-arrow-alt-circle-right fa-2x"></i></a>
+			{% endif %}
+			
+		</div>
+	{% endif %}	
+	<!--Grid row-->
+	<div class="row">	
+		<!--Grid column-->
+		<div class="col-12 mb-4 ml-5">
+			{% for company in company_list %}
+				<!-- Card -->
+				<div class="card gradient-card">
+					<div class="card-image" style="background-image: url(https://mdbcdn.b-cdn.net/img/Photos/Horizontal/Work/4-col/img%20%2814%29.jpg)">
+						<!-- Content -->
+						<a href="#!">
+						{% if company.get_order_sum.total__sum|floatformat:2 >= '50000.00' %}
+							<div class="text-white d-flex h-100 mask dusty-grass-gradient">
+						{% else %}
+							<div class="text-white d-flex h-100 mask sunny-morning-gradient">
+						{% endif %}
+								<div class="first-content align-self-center p-3">
+									<h3 class="card-title">{{ company.name }}</h3>
+									<p class="lead mb-0">Click on this card to see details</p>
+								</div>
+								<div class="second-content align-self-center mx-auto text-center">
+									<i class="far fa-money-bill-alt fa-3x"></i>
+								</div>
+							</div>
+						</a>
+					</div>
+
+					<!-- Data -->
+					<div class="third-content ml-auto mr-4 mb-2">
+						<p class="text-uppercase text-muted">
+							Order Total
+						</p>
+						<h4 class="font-weight-bold float-right">
+							${{ company.get_order_sum.total__sum|floatformat:2 }}
+						</h4>
+					</div>
+
+					<!-- Content -->
+					<div class="card-body white">
+						<div class="progress md-progress">
+							<div class="progress-bar bg-primary" role="progressbar" style="width: 25%;" aria-valuenow="{{ company.get_company_order_count }}" aria-valuemin="0" aria-valuemax="100"></div>
+						</div>
+						<p class="text-muted">{{ company.get_company_order_count }} orders</p>
+						<h4 class="text-uppercase font-weight-bold my-4">Customers</h4>
+						{% for contact in company.contacts.all %}
+							<p class="text-muted" align="justify">
+								<span class='badge badge-success'>{{ contact.get_contacts_order_count }}</span> order{{ contact.get_contacts_order_count|pluralize }} for {{ contact.first_name }} {{ contact.last_name }} 
+							</p>
+						{% endfor %}
+					</div>
+
+				</div>
+				<!-- Card -->
 			{% endfor %}
-		{% endfor %}
-	</table>
+		</div>
+		<!--Grid column-->
 	</div>
+</div>
+	<!-- Bootstrap tooltips -->
+	<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.4/umd/popper.min.js"></script>
+	<!-- Bootstrap core JavaScript -->
+	<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.5.0/js/bootstrap.min.js"></script>
+	<!-- MDB core JavaScript -->
+	<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mdbootstrap/4.19.1/js/mdb.min.js"></script>
+	<script type="text/javascript" src="{% static 'js/cards-extended.min.js' %}"></script>
 </body>
 </html>
